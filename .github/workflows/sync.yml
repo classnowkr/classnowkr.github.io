@@ -27,10 +27,11 @@ jobs:
           git clone --depth 1 https://github.com/yjb8634-sudo/class-diary.git /tmp/src
           S=/tmp/src
           test -f "$S/classroom-drive/index.html" && test -f "$S/classroom-drive/drv.js"
-          find . -maxdepth 1 -type f ! -name 'README.md' -delete
+          find . -maxdepth 1 -type f ! -name 'README.md' ! -name 'LICENSE' ! -name 'robots.txt' -delete
           find "$S/classroom-drive" -maxdepth 1 -type f -exec cp -f {} ./ \;
           mkdir -p solo && cp -f "$S/solo/core.js" solo/
           cp -f "$S/privacy.html" ./
+          cp -f "$S/LICENSE" ./
           cp -f "$S/classnow-tv.apk" ./tv.apk
           touch .nojekyll
           git config user.name 'classnow-bot'
