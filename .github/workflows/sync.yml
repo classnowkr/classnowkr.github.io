@@ -1,0 +1,41 @@
+# 클래스 나우 구글 드라이브판을 이 짧은 주소(https://classnowkr.github.io)에 올립니다.
+# 원본은 yjb8634-sudo/class-diary 의 classroom-drive/ 입니다. 매시간 확인해서 바뀐 것만 올리고,
+# 바로 올리려면 [Actions] → '드라이브판 받아 오기' → [Run workflow].
+name: 드라이브판 받아 오기
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: 원본에서 받아 오기
+        run: |
+          set -e
+          git clone --depth 1 https://github.com/yjb8634-sudo/class-diary.git /tmp/src
+          S=/tmp/src
+          test -f "$S/classroom-drive/index.html" && test -f "$S/classroom-drive/drv.js"
+          find . -maxdepth 1 -type f ! -name 'README.md' -delete
+          find "$S/classroom-drive" -maxdepth 1 -type f -exec cp -f {} ./ \;
+          mkdir -p solo && cp -f "$S/solo/core.js" solo/
+          cp -f "$S/privacy.html" ./
+          cp -f "$S/classnow-tv.apk" ./tv.apk
+          touch .nojekyll
+          git config user.name 'classnow-bot'
+          git config user.email 'classnow-bot@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then echo "바뀐 것이 없어요."; exit 0; fi
+          git commit -m "드라이브판 받아 오기 ($(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M'))"
+          git push
